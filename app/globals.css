@@ -1,0 +1,212 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+/* Integration styles for RadixUI and Bootstrap */
+[data-state="active"][data-radix-tabs-trigger] {
+  color: var(--bs-primary);
+  border-bottom: 2px solid var(--bs-primary);
+  font-weight: 600;
+}
+
+/* Bootstrap Integration Utilities */
+.btn-gradient {
+  background: linear-gradient(135deg, var(--bs-primary) 0%, rgba(var(--bs-primary-rgb), 0.8) 100%);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+  background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.8) 0%, var(--bs-primary) 100%);
+  color: white;
+}
+
+/* Card Styles */
+.session-card {
+  transition: all 0.3s ease;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.session-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Avatar Stacks */
+.avatar-stack img {
+  margin-right: -10px;
+  border: 2px solid white;
+}
+
+/* Dark Mode Overrides for Bootstrap */
+.dark .card:not(.bg-primary):not(.bg-success):not(.bg-info):not(.bg-warning) {
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border-color: hsl(var(--border));
+}
+
+.dark .btn-outline-light {
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+.dark .btn-outline-light:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.dark .text-muted {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Custom Radix Tabs Integration with Bootstrap */
+.nav-tabs[data-radix-tabs-list] {
+  border-bottom: 1px solid var(--bs-border-color);
+  gap: 0.5rem;
+}
+
+[data-radix-tabs-trigger] {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: var(--bs-nav-link-color);
+  transition: all 0.2s ease-in-out;
+}
+
+[data-radix-tabs-trigger]:hover {
+  color: var(--bs-primary);
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+  [data-radix-tabs-list] {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  [data-radix-tabs-trigger] {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Custom styles */
+.hero-section {
+  background: linear-gradient(135deg, #4a6cf7 0%, #2b3cf7 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("/placeholder.svg?height=800&width=1600");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.15;
+  z-index: 0;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.session-count {
+  color: #4a6cf7;
+}
+
+.nav-tabs .nav-link {
+  color: #4a5568;
+  font-weight: 500;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link.active {
+  color: #4a6cf7;
+  background-color: rgba(74, 108, 247, 0.1);
+  border-bottom: 2px solid #4a6cf7;
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.avatar-stack {
+  display: flex;
+}
+
+.time-badge,
+.location-badge {
+  background-color: rgba(74, 108, 247, 0.1);
+  color: #4a6cf7;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.footer {
+  background-color: #f8f9fa;
+  padding: 2rem 0;
+  margin-top: 4rem;
+}
