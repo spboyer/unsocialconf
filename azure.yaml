@@ -1,0 +1,10 @@
+name: unsocial-v
+services:
+  web:
+    project: .
+    language: js
+    host: containerapp
+    docker:
+      path: .
+      remoteBuild: true
+      
