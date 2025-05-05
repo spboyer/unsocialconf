@@ -41,7 +41,7 @@ export default function HomePage() {
             <div className="col-lg-6">
               <div className="position-relative">
                 <img
-                  src="/placeholder.svg?height=400&width=600"
+                  src="/main-box-unconference.png?height=400&width=600"
                   alt="Unconference"
                   className="img-fluid rounded-4 shadow-lg"
                 />
