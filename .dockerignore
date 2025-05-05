@@ -1,0 +1,29 @@
+# Exclude node_modules and .pnpm store
+node_modules
+.pnpm
+
+# Exclude development files
+.git
+.github
+.vscode
+.next
+
+# Exclude logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Testing files
+coverage
+.nyc_output
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
