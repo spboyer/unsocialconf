@@ -27,6 +27,10 @@ WORKDIR /app
 
 # Set environment to production
 ENV NODE_ENV=production
+ENV AZURE_ENDPOINT=$AZURE_ENDPOINT
+ENV API_VERSION=$API_VERSION
+ENV DEPLOYMENT_NAME=$DEPLOYMENT_NAME
+ENV AZURE_API_KEY=$AZURE_API_KEY
 
 # Create a non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \

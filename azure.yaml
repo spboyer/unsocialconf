@@ -6,3 +6,12 @@ services:
     project: .
     language: js
     host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: .
+      buildArgs:
+        - NODE_ENV=production
+        - AZURE_ENDPOINT=${AZURE_ENDPOINT}
+        - API_VERSION=${API_VERSION}
+        - DEPLOYMENT_NAME=${DEPLOYMENT_NAME}
+        - AZURE_API_KEY=${AZURE_API_KEY}
