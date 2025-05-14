@@ -33,8 +33,7 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
   location: location
   tags: tags
   properties: {
-    appLogsConfiguration: {
-      destination: 'log-analytics'
+    appLogsConfiguration: {      destination: 'log-analytics'
       logAnalyticsConfiguration: {
         customerId: logAnalyticsWorkspace.properties.customerId
         sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey

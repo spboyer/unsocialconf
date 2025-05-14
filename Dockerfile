@@ -3,21 +3,23 @@ FROM node:20-alpine AS base
 # Set working directory
 WORKDIR /app
 
-# Dependencies stage - Install all dependencies
+# Dependencies stage - Install all node modules
 FROM base AS dependencies
-# Copy package.json
-COPY package.json ./
-# Install dependencies with legacy-peer-deps to ignore peer dependency conflicts
-RUN npm install --legacy-peer-deps
+# Copy package.json and lock file
+COPY package.json package-lock.json* pnpm-lock.yaml* ./
+# Install pnpm
+RUN npm install -g pnpm
+# Install dependencies using pnpm
+RUN pnpm install --frozen-lockfile
 
-# Build stage - Build the application
+# Build stage - Build the Next.js application
 FROM base AS builder
 # Copy dependencies from previous stage
 COPY --from=dependencies /app/node_modules ./node_modules
-# Copy all files
+# Copy all project files
 COPY . .
-# Build the app
-RUN npm run build --legacy-peer-deps
+# Build the app in standalone mode for better container support
+RUN npm install -g pnpm && pnpm build
 
 # Production stage - Create the production image
 FROM node:20-alpine AS runner
@@ -30,7 +32,7 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy necessary files from builder
+# Copy required files from the builder stage
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static

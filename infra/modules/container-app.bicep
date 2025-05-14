@@ -37,7 +37,10 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
   location: location
   tags: tags
-  identity: {
+  identity: identityType == 'UserAssigned' || identityType == 'SystemAssigned,UserAssigned' ? {
+    type: identityType
+    userAssignedIdentities: identityType == 'UserAssigned' || identityType == 'SystemAssigned,UserAssigned' ? userAssignedIdentities : null
+  } : {
     type: identityType
   }
   properties: {
@@ -79,7 +82,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           username: containerRegistry.listCredentials().username
           passwordSecretRef: 'container-registry-password'
         }
-      ]
+      ]        
       secrets: [
         {
           name: 'container-registry-password'
@@ -87,7 +90,8 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         }
       ]
     }
-    template: {      containers: [
+    template: {
+      containers: [
         {
           name: name
           image: '${containerRegistry.properties.loginServer}/web:latest'

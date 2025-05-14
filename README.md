@@ -16,6 +16,7 @@ This application provides the digital infrastructure to facilitate these events,
 - **Community Voting**: Participants collectively decide which sessions should be included through upvoting
 - **Dynamic Agenda Building**: The schedule evolves organically based on community interest and speaker availability
 - **Tracks Organization**: Sessions are categorized by tracks (Development, Design, Product, Leadership) for easier navigation
+- **AI-Powered Suggestions**: Azure AI integration to suggest titles and descriptions for session proposals
 - **Responsive Design**: Works seamlessly on all devices, allowing participation from anywhere
 - **Dark/Light Mode**: Supports theme switching for comfortable viewing in any environment
 - **Real-time Updates**: Stay informed about new sessions, schedule changes, and popular topics
@@ -29,6 +30,8 @@ This application provides the digital infrastructure to facilitate these events,
   - Radix UI for accessible UI primitives
 - **State Management**: Custom store with React hooks
 - **Theming**: next-themes for dark/light mode support
+- **AI Integration**: Azure AI services for intelligent suggestions
+- **Deployment**: Containerized with Docker for Azure Container Apps
 
 ## Getting Started
 
@@ -36,6 +39,8 @@ This application provides the digital infrastructure to facilitate these events,
 
 - Node.js 18.x or higher
 - npm or pnpm
+- Docker (for containerization)
+- Azure subscription (for deployment)
 
 ### Installation
 
@@ -52,14 +57,36 @@ This application provides the digital infrastructure to facilitate these events,
    pnpm install
    ```
 
-3. Run the development server:
+3. Copy the example environment file and update the values:
+   ```bash
+   cp .env.example .env.local
+   ```
+     Update the Azure AI service configuration in `.env.local`:
+   ```
+   AZURE_AI_ENDPOINT=your-azure-ai-endpoint
+   AZURE_AI_AGENT_ID=your-agent-id
+   AZURE_AI_THREAD_ID=your-thread-id
+   
+   # Authentication options:
+   # Option 1: Use DefaultAzureCredential (managed identity or Azure CLI)
+   # (no additional configuration needed if logged in with 'az login')
+   
+   # Option 2: Use API Key authentication 
+   AZURE_API_KEY=your-api-key-from-azure-portal
+   # (no additional configuration needed if logged in with 'az login')
+   
+   # Option 2: Use API Key authentication 
+   AZURE_API_KEY=your-api-key-from-azure-portal
+   ```
+
+4. Run the development server:
    ```bash
    npm run dev
    # or
    pnpm dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
 ## Project Structure
 
@@ -108,15 +135,82 @@ To add a new track category:
 1. Update the `getTrackColor` and `getTrackIcon` functions in `components/session-card.tsx`
 2. Add the new track to the options in the submission form
 
-## Contributing
+## Containerization and Deployment
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Docker
 
-## License
+The application comes with a multi-stage Dockerfile optimized for production:
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+```bash
+# Build the container
+docker build -t unsocial-app .
 
-## The Value of Social Unconferences
+# Run the container locally
+docker run -p 3000:3000 unsocial-app
+```
+
+### Azure Deployment
+
+This project is configured for deployment to Azure Container Apps using Azure Developer CLI (azd):
+
+1. Login to Azure:
+   ```bash
+   az login
+   ```
+
+2. Initialize the Azure Developer CLI environment:
+   ```bash
+   azd init
+   ```
+
+3. Provision infrastructure and deploy the application:
+   ```bash
+   azd up
+   ```
+
+This will:
+- Create the required Azure resources defined in the Bicep templates
+- Build and push the Docker container to Azure Container Registry
+- Deploy the container to Azure Container Apps
+- Set up managed identity for secure access to Azure AI services
+
+### Environment Variables
+
+The following environment variables are required for the AI features:
+
+- `AZURE_AI_ENDPOINT`: The endpoint URL for your Azure AI service
+- `AZURE_AI_AGENT_ID`: The ID of your AI agent
+- `AZURE_AI_THREAD_ID`: The thread ID for conversation context
+
+In production, these are securely provided through the Azure Container App environment.
+
+## AI Session Suggestion Feature
+
+The application includes an AI-powered feature that helps users generate session titles and descriptions based on their initial input. This feature uses Azure AI services to provide intelligent suggestions.
+
+### How It Works
+
+1. Users enter basic information like track, presenter name, and optionally initial title/description
+2. Users click the "AI Suggest" button with the sparkle icon
+3. The client sends this data to the server-side API endpoint
+4. The API uses Azure AI with managed identity to generate relevant suggestions
+5. Suggestions are returned and populated into the form fields
+6. Users can edit the suggestions before submitting
+
+### Implementation Details
+
+- Client-side code in `lib/ai-session-suggest.js` makes the API call
+- Server-side API endpoint in `app/api/ai-suggest/route.js` processes the request
+- Azure AI integration is achieved using the `@azure/ai-projects` SDK
+- The system uses DefaultAzureCredential for secure authentication
+- If Azure AI is unavailable, the system falls back to pre-defined templates
+
+### Customizing AI Behavior
+
+To customize the AI suggestions:
+1. Create your own Azure AI service in Azure Portal
+2. Update the environment variables with your service details
+3. Modify the prompt in `generateAISuggestion()` function to guide the AI response
 
 Social unconferences offer several advantages over traditional conference formats:
 

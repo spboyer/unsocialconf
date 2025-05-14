@@ -1,10 +1,8 @@
-name: unsocial-v
+name: unconferenceapp
+metadata:
+  template: unconferenceapp@0.1.0
 services:
   web:
     project: .
     language: js
     host: containerapp
-    docker:
-      path: .
-      remoteBuild: true
-      

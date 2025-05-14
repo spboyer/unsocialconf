@@ -1,6 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { FaStar } from "react-icons/fa"
+// Import the AI suggestion function
+import { getAISessionSuggestion } from "@/lib/ai-session-suggest"
 
 export default function SubmitForm({ onSubmit, isSubmitting }) {
   const [formData, setFormData] = useState({
@@ -11,6 +15,26 @@ export default function SubmitForm({ onSubmit, isSubmitting }) {
   })
 
   const [errors, setErrors] = useState({})
+  const [isAISuggesting, setIsAISuggesting] = useState(false)
+
+  // AI Suggestion handler
+  const handleAISuggest = async () => {
+    setIsAISuggesting(true)
+    try {
+      const suggestion = await getAISessionSuggestion(formData)
+      setFormData((prev) => ({
+        ...prev,
+        title: suggestion.title || prev.title,
+        description: suggestion.description || prev.description,
+      }))
+    } catch (e) {
+      // Optionally show a toast or error
+      // eslint-disable-next-line no-console
+      console.error("AI suggestion failed", e)
+    } finally {
+      setIsAISuggesting(false)
+    }
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -75,6 +99,19 @@ export default function SubmitForm({ onSubmit, isSubmitting }) {
 
   return (
     <form onSubmit={handleSubmit} className="needs-validation">
+      <div className="d-flex justify-content-end mb-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleAISuggest}
+          disabled={isAISuggesting || isSubmitting}
+          title="Suggest title & description with AI"
+        >
+          <FaStar className="me-2 text-warning" />
+          {isAISuggesting ? "Suggesting..." : "AI Suggest"}
+        </Button>
+      </div>
       <div className="mb-4">
         <label htmlFor="title" className="form-label fw-medium">
           <i className="fas fa-heading me-2 text-primary"></i>Session Title
