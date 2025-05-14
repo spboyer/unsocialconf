@@ -9,6 +9,20 @@
     },
     "webAppExists": {
       "value": "${SERVICE_WEB_RESOURCE_EXISTS=false}"
+    },
+    "azureEndpoint": {
+      "value": "${AZURE_ENDPOINT}"
+    },
+    "apiVersion": {
+      "value": "${API_VERSION}"
+    },    "deploymentName": {
+      "value": "${DEPLOYMENT_NAME}"
+    },
+    "azureApiKey": {
+      "value": "${AZURE_API_KEY}"
+    },
+    "nodeEnv": {
+      "value": "${NODE_ENV=production}"
     }
   }
 }

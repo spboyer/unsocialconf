@@ -10,6 +10,23 @@ param location string = resourceGroup().location
 @description('Flag to determine if the web container app already exists')
 param webAppExists bool = false
 
+// Azure OpenAI parameters
+@description('The Azure OpenAI endpoint')
+param azureEndpoint string = ''
+
+@description('The Azure OpenAI API version')
+param apiVersion string = '2024-04-01-preview'
+
+@description('The Azure OpenAI deployment name')
+param deploymentName string = 'gpt-4o-mini'
+
+@secure()
+@description('The Azure OpenAI API key')
+param azureApiKey string = ''
+
+@description('Node.js environment')
+param nodeEnv string = 'production'
+
 // Tags that should be applied to all resources.
 // 
 // Note that 'azd-env-name' tag is required for azd to be able to
@@ -102,25 +119,43 @@ module web 'br/public:avm/ptn/azd/container-app-upsert:0.1.1' = {
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     ingressEnabled: true
+    targetPort: 3000
+    external: true
     identityType: 'UserAssigned'
     exists: webAppExists
     containerName: 'main'
     env: [
       {
         name: 'NODE_ENV'
-        value: 'production'
+        value: nodeEnv
       }
       {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
         value: monitoring.outputs.applicationInsightsConnectionString
+      }
+      {
+        name: 'AZURE_ENDPOINT'
+        value: azureEndpoint
+      }
+      {
+        name: 'API_VERSION'
+        value: apiVersion
+      }
+      {
+        name: 'DEPLOYMENT_NAME'
+        value: deploymentName
+      }
+      {
+        name: 'AZURE_API_KEY'
+        value: azureApiKey
       }
     ]
     identityName: webIdentity.name
     userAssignedIdentityResourceId: webIdentity.outputs.resourceId
     containerMinReplicas: 1
     containerMaxReplicas: 3
-     containerCpuCoreCount: '1.0'
-    containerMemory: '2.0Gi'
+    containerCpuCoreCount: '0.5'
+    containerMemory: '1.0Gi'
     identityPrincipalId: webIdentity.outputs.principalId
   }
 }
