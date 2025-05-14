@@ -7,6 +7,9 @@ param environmentName string
 @description('Primary location for all resources')
 param location string = resourceGroup().location
 
+@description('Flag to determine if the web container app already exists')
+param webAppExists bool = false
+
 // Tags that should be applied to all resources.
 // 
 // Note that 'azd-env-name' tag is required for azd to be able to
@@ -37,6 +40,8 @@ var abbrs = {
   containerApps: 'ca'
   containerRegistry: 'cr'
   logAnalyticsWorkspace: 'law'
+  managedIdentityUserAssignedIdentities: 'id'
+  appInsightsComponents: 'appi'
 }
 
 // Name of the container app
@@ -51,43 +56,78 @@ var resolvedLogAnalyticsName = !empty(logAnalyticsName) ? logAnalyticsName : '${
 // Name of the container registry
 var resolvedContainerRegistryName = !empty(containerRegistryName) ? containerRegistryName : '${abbrs.containerRegistry}${resourceToken}'
 
-// Create a Container App Environment with managed identity
-module containerAppEnv 'modules/container-app-environment.bicep' = {
-  name: 'container-app-environment'
+// Create a Container Apps Environment with Log Analytics
+module monitoring 'br/public:avm/ptn/azd/monitoring:0.1.0' = {
+  name: 'monitoring'
   params: {
-    name: resolvedContainerAppEnvName
+    applicationInsightsName: '${abbrs.appInsightsComponents}${resourceToken}'
+    logAnalyticsName: resolvedLogAnalyticsName
     location: location
     tags: tags
-    logAnalyticsWorkspaceName: resolvedLogAnalyticsName
   }
 }
 
-// Create a Container Registry with admin user enabled
-module containerRegistry 'modules/container-registry.bicep' = {
-  name: 'container-registry'
+// Container apps host (including container registry)
+module containerApps 'br/public:avm/ptn/azd/container-apps-stack:0.1.0' = {
+  name: 'container-apps'
   params: {
-    name: resolvedContainerRegistryName
+    containerAppsEnvironmentName: resolvedContainerAppEnvName
+    containerRegistryName: resolvedContainerRegistryName
+    logAnalyticsWorkspaceResourceId: monitoring.outputs.logAnalyticsWorkspaceResourceId
+    appInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
+    acrSku: 'Basic'
     location: location
+    acrAdminUserEnabled: true
+    zoneRedundant: false
     tags: tags
-    adminUserEnabled: true
   }
 }
 
-// Create a Container App with managed identity
-module containerApp 'modules/container-app.bicep' = {
-  name: 'container-app'
+// Managed identity for the web app
+module webIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.2.1' = {
+  name: 'webidentity'
+  params: {
+    name: '${abbrs.managedIdentityUserAssignedIdentities}web-${resourceToken}'
+    location: location
+  }
+}
+
+// Web app container
+module web 'br/public:avm/ptn/azd/container-app-upsert:0.1.1' = {
+  name: 'web-container-app'
   params: {
     name: resolvedContainerAppName
+    tags: union(tags, { 'azd-service-name': 'web' })
     location: location
-    tags: tags
-    identityType: 'SystemAssigned'
-    containerAppEnvironmentId: containerAppEnv.outputs.id
-    containerRegistryName: containerRegistry.outputs.name
-    targetPort: 3000
+    containerAppsEnvironmentName: containerApps.outputs.environmentName
+    containerRegistryName: containerApps.outputs.registryName
+    ingressEnabled: true
+    identityType: 'UserAssigned'
+    exists: webAppExists
+    containerName: 'main'
+    env: [
+      {
+        name: 'NODE_ENV'
+        value: 'production'
+      }
+      {
+        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+        value: monitoring.outputs.applicationInsightsConnectionString
+      }
+    ]
+    identityName: webIdentity.name
+    userAssignedIdentityResourceId: webIdentity.outputs.resourceId
+    containerMinReplicas: 1
+    containerMaxReplicas: 3
+     containerCpuCoreCount: '1.0'
+    containerMemory: '2.0Gi'
+    identityPrincipalId: webIdentity.outputs.principalId
   }
 }
 
-output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.outputs.loginServer
-output AZURE_CONTAINER_APP_NAME string = containerApp.outputs.name
-output AZURE_CONTAINER_APP_URI string = containerApp.outputs.uri
-output AZURE_CONTAINER_APP_ENV_NAME string = containerAppEnv.outputs.name
+// Outputs
+output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerApps.outputs.registryLoginServer
+output AZURE_CONTAINER_APP_NAME string = web.outputs.name
+output AZURE_CONTAINER_APP_URI string = web.outputs.uri
+output AZURE_CONTAINER_APP_ENV_NAME string = containerApps.outputs.environmentName
+output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
