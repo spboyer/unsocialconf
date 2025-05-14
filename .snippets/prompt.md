@@ -25,11 +25,13 @@
 3. **Deploy with azd**
    - Initialize the azd environment with `azd init`
    - Provision the infrastructure with `azd provision`
+   - Deploy the application with `azd deploy`
 
 ## Key configuration for success
 - Ensure the image reference in the Container App Bicep template matches the image name pushed to ACR
 - Use remote container builds to build in Azure rather than locally
 - Set the correct port mapping (typically 3000 for Next.js apps)
+- Set the targetPort in the containerApp bicep definition to 3000 to match the Next.js config
 
 ## Example azure.yaml configuration
 ```yaml
