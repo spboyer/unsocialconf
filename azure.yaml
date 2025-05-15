@@ -5,6 +5,6 @@ services:
     language: js
     host: containerapp
     docker:
-      path: .
+      path: ./Dockerfile
       remoteBuild: true
       

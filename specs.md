@@ -28,12 +28,14 @@ UnconferenceApp is a modern Next.js application designed as an "un-conference" p
 - **Hosting Service**: Azure Container Apps
 - **Container Registry**: Azure Container Registry
 - **Deployment Tool**: Azure Developer CLI (azd)
+- **Infrastructure Pattern**: Azure Verified Modules (AVM)
 
 ### Deployment Architecture
-- Container App Environment with Log Analytics integration
+- Container App Environment with Log Analytics and Application Insights integration
 - Container Registry for Docker image storage
 - Container App with properly configured ingress
 - Remote Docker builds for optimized deployment
+- User-assigned managed identity for enhanced security
 
 ## Key Components
 
@@ -52,16 +54,21 @@ UnconferenceApp is a modern Next.js application designed as an "un-conference" p
 
 ## Azure Resource Configuration
 
+### Monitoring
+- Application Insights for application monitoring and telemetry
+- Log Analytics workspace for centralized logging
+
 ### Container Registry
 - Basic SKU for development
 - Admin access enabled for CI/CD integration
 
 ### Container App
 - CPU: 0.5 cores
-- Memory: 1Gi
+- Memory: 1.0Gi
 - External ingress on port 3000
 - CORS configured for secure cross-origin requests
 - Scaling configuration: 1-3 replicas
+- User-assigned managed identity for enhanced security
 
 ## Development and Deployment Workflow
 
@@ -69,6 +76,7 @@ UnconferenceApp is a modern Next.js application designed as an "un-conference" p
 2. Containerization with multi-stage Docker build
 3. Deployment to Azure using Azure Developer CLI (azd)
 4. Remote container builds in Azure Container Registry
+5. Monitoring application performance with Application Insights
 
 ## Four Prompts for LLM Generation
 
@@ -129,35 +137,39 @@ Also, create a next.config.mjs file that:
 Make sure the Dockerfile is optimized for caching and minimal final image size.
 ```
 
-### Prompt 3: Azure Infrastructure as Code (Bicep)
+### Prompt 3: Azure Infrastructure as Code (Bicep with AVM)
 
 ```
-Create Azure Bicep templates for deploying the UnconferenceApp application to Azure Container Apps. Structure the files as follows:
+Create Azure Bicep templates for deploying the UnconferenceApp application to Azure Container Apps using Azure Verified Modules (AVM). Structure the file as follows:
 
 1. main.bicep - The entry point with parameters for:
    - Environment name
    - Location
    - Resource naming and tagging
    - Container specific configurations
+   - Application specific environment variables
 
-2. Module files:
-   - container-app-environment.bicep - For Container App Environment with Log Analytics
-   - container-registry.bicep - For Azure Container Registry
-   - container-app.bicep - For the Container App itself
+Implementation details:
+- Use AVM pattern modules from the public registry:
+  - 'br/public:avm/ptn/azd/monitoring' for Application Insights and Log Analytics
+  - 'br/public:avm/ptn/azd/container-apps-stack' for Container App Environment and Registry
+  - 'br/public:avm/res/managed-identity/user-assigned-identity' for managed identity
+  - 'br/public:avm/ptn/azd/container-app-upsert' for the Container App
 
 Requirements:
 - Container Registry with admin access enabled
-- Container App Environment with Log Analytics for monitoring
+- Container App Environment with Log Analytics and Application Insights
 - Container App configured with:
-  - System-assigned managed identity
+  - User-assigned managed identity
   - External ingress on port 3000
   - CORS policy
   - Registry authentication
-  - 0.5 CPU cores and 1Gi memory
+  - 0.5 CPU cores and 1.0Gi memory
   - Scale settings: 1-3 replicas
   - Production environment variables
+  - Application Insights integration
 
-3. main.parameters.json - Parameter file for Bicep deployment with environment variable placeholders.
+2. main.parameters.json - Parameter file for Bicep deployment with environment variable placeholders.
 
 Ensure proper resource dependencies and outputs for connection strings and endpoints.
 ```
@@ -186,16 +198,16 @@ To deploy this application:
 
 1. Ensure Azure CLI and Azure Developer CLI (azd) are installed
 2. Initialize the azd environment with `azd init`
-3. Use `az acr build` to build and push the Docker image to Azure Container Registry
-4. Provision the infrastructure with `azd provision`
-5. Access the application at the provided Container App URL
+3. Provision the infrastructure and deploy the application with `azd up`
+4. Access the application at the provided Container App URL
+5. Monitor application performance in Application Insights
 
 ## Maintenance and Updates
 
 For application updates:
 1. Make code changes
 2. Push changes to the repository
-3. Rebuild the container with `az acr build`
-4. Redeploy with `azd provision`
+3. Run `azd up` to rebuild and redeploy the application
+4. Monitor the application performance in Application Insights
 
-This approach ensures consistent, repeatable deployments with minimal configuration overhead.
+This approach ensures consistent, repeatable deployments with minimal configuration overhead while following Azure best practices through Azure Verified Modules.
