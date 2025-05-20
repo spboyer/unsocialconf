@@ -1,0 +1,8 @@
+Implement an Azure OpenAI feature for my unconference app that allows users to get AI-generated session title and description suggestions. 
+
+I need:
+1. A "Suggest with AI" button on the session submission form
+2. Integration with Azure OpenAI using environment variables for configuration
+3. A fallback mechanism when Azure AI is unavailable 
+
+The API endpoint should be at /api/ai-suggest and connect to Azure OpenAI's gpt-4o-mini model. Make the suggestion enhance the user's input while keeping their core ideas.
